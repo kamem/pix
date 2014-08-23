@@ -28,10 +28,6 @@ html {font-size:es($font-sizeDefault,'%',$font-size);}
 	}
 }
 
-body {
-	text-align: center;
-}
-
 @if $html5 {
 /*----------------------------------------
 	HTML5

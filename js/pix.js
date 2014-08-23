@@ -1,43 +1,44 @@
 var Pix = function(canvasName,pix){
-    this.pix = pix;
-
+    this.canvasName = canvasName;
     this.canvas = $('.' + canvasName)[0];
     this.ctx = this.canvas.getContext('2d');
 
-    this.widthNum = pix[0].length;
-    this.heightNum = pix.length;
 
-    this.squareWidth = 25;
-    this.squareHeight = 25;
+    this.widthNum = pix.length === 0 ? 25 : pix[0].length;
+    this.heightNum = pix.length === 0 ? 25 : pix.length;
 
-    this.canvas.width = this.widthNum * 25;
-    this.canvas.height = this.heightNum * 25;
+    this.squareWidth = 20;
+    this.squareHeight = 20;
+
+    this.ctx.clearRect(0,0,this.widthNum * this.squareWidth,this.heightNum * this.squareHeight);
+    this.color = '#000';
 
     this.stageWidth = this.canvas.width;
     this.stageHeight = this.canvas.height;
 
+
+    this.$wrap = $('.' + canvasName).parent();
+
+    this.pix = pix;
+    this.nowPix = [];
+
     this.squareAry = [];
-    this.squareRowAry = this.createRowAry();
+    this.squareRowAry = this.createRowAry(this.pix);
 
-    this.color = "rgb(255, 0, 255)";
-
-    this.ctx.strokeStyle = this.color;
-    this.ctx.fillStyle = this.color;
-
-    this.$elCol = $('.col');
-    this.$elRow = $('.row');
-
-
-    this.createSquaresInfo();
+    this.isCreateMode = false;
 };
 
-Pix.prototype.squares = function() {
-    var colLength = this.stageWidth / this.squareWidth,
-        rowLength = this.stageHeight / this.squareHeight,
-        squareLength = colLength * rowLength;
+Pix.prototype.createSquares = function() {
+    this.canvas.width = this.widthNum * this.squareWidth;
+    this.canvas.height = this.heightNum * this.squareHeight;
+
+    console.log(this.nowPix.length);
+    var hasNowPix = this.nowPix.length >= this.heightNum;
 
     for(var i = 0;i < this.heightNum;i++) {
         this.squareAry[i] = [];
+        this.nowPix[i] = hasNowPix ? this.nowPix[i] : [];
+
         for(var j = 0;j < this.widthNum;j++) {
             var leftPosition = j * this.squareWidth;
             var topPosition = i * this.squareHeight;
@@ -46,21 +47,30 @@ Pix.prototype.squares = function() {
                 rowNum: i,
                 leftPosition: leftPosition,
                 topPosition: topPosition,
-                isDrow: false,
-                hasCompleted: false ===  !!this.pix[i][j]
+                isDrow: this.isCreateMode && this.pix.length !== 0 ? !!this.pix[i][j] :
+                    hasNowPix ? !!this.nowPix[i][j] : false,
+                hasCompleted: this.pix.length === 0 ? false : false === !!this.pix[i][j]
             };
             this.squareStroke(this.squareAry[i][j]);
+            if(this.squareAry[i][j].isDrow) {this.squareDraw(this.squareAry[i][j]);}
+            this.nowPix[i][j] = this.isCreateMode && this.pix.length !== 0 ? this.pix[i][j] :
+                hasNowPix ? this.nowPix[i][j] : 0;
         }
     }
 };
 
 Pix.prototype.setEvents = function() {
-    $(this.canvas).on('click',function(e){
+    $(this.canvas).off('click').on('click',function(e){
         var squarePosition = this.getOffsetSquare(e.offsetX,e.offsetY);
         this.squareToggle(squarePosition);
 
-        if(this.hasAllCompleted()) {
+        if(this.hasAllCompleted() && !this.isCreateMode) {
             alert('完成！');
+        }
+
+        if(this.isCreateMode) {
+            this.squareRowAry = this.createRowAry(this.nowPix);
+            this.createSquaresInfo(this.nowPix);
         }
     }.bind(this));
 };
@@ -73,6 +83,7 @@ Pix.prototype.getOffsetSquare = function(x,y){
 };
 
 Pix.prototype.squareStroke = function(squareInfo) {
+    this.ctx.strokeStyle = this.color;
     this.ctx.strokeRect(
         squareInfo.leftPosition,
         squareInfo.topPosition,
@@ -90,11 +101,12 @@ Pix.prototype.squareDraw = function(squareInfo) {
         this.squareHeight
     );
     squareInfo.isDrow = true;
-    squareInfo.hasCompleted = squareInfo.isDrow === !!this.pix[squareInfo.rowNum][squareInfo.colNum];
+    if(!this.isCreateMode) {squareInfo.hasCompleted = squareInfo.isDrow === !!this.pix[squareInfo.rowNum][squareInfo.colNum];}
+    this.nowPix[squareInfo.rowNum][squareInfo.colNum] = 1;
 };
 
 Pix.prototype.squareClaer = function(squareInfo) {
-    this.ctx.fillStyle = "rgb(255, 255, 255)";
+    this.ctx.fillStyle = "#fff";
     this.ctx.fillRect(
         squareInfo.leftPosition,
         squareInfo.topPosition,
@@ -102,7 +114,8 @@ Pix.prototype.squareClaer = function(squareInfo) {
         this.squareHeight
     );
     squareInfo.isDrow = false;
-    squareInfo.hasCompleted = squareInfo.isDrow === !!this.pix[squareInfo.rowNum][squareInfo.colNum];
+    if(!this.isCreateMode) {squareInfo.hasCompleted = squareInfo.isDrow === !!this.pix[squareInfo.rowNum][squareInfo.colNum];}
+    this.nowPix[squareInfo.rowNum][squareInfo.colNum] = 0;
 };
 
 Pix.prototype.squareToggle = function(squareInfo) {
@@ -128,12 +141,12 @@ Pix.prototype.hasAllCompleted = function() {
 };
 
 
-Pix.prototype.createRowAry = function() {
+Pix.prototype.createRowAry = function(pix) {
     var rowAry = [];
-    for(var i = 0;i < this.pix.length;i++) {
-        for(var j = 0;j < this.pix[i].length;j++) {
+    for(var i = 0;i < pix.length;i++) {
+        for(var j = 0;j < pix[i].length;j++) {
             if(!rowAry[j]) {rowAry[j] = [];}
-            rowAry[j].push(this.pix[i][j]);
+            rowAry[j].push(pix[i][j]);
         }
     }
 
@@ -159,22 +172,14 @@ Pix.prototype.squaresInfo = function(lineAry) {
     return squaresNumAry.length === 0 ? [0] : squaresNumAry;
 };
 
-Pix.prototype.createSquaresInfo = function() {
-    for(var i = 0;i < this.pix.length;i++) {
-        this.$elCol.append('<li>' + this.squaresInfo(this.pix[i]).join(' ') + '</li>');
+Pix.prototype.createSquaresInfo = function(pix) {
+    var $elCol = this.$wrap.find('.col').html(''),
+        $elRow = this.$wrap.find('.row').html('');
+
+    for(var i = 0;i < pix.length;i++) {
+        $elCol.append('<li>' + this.squaresInfo(pix[i]).join(' ') + '</li>');
     }
     for(var j = 0;j < this.squareRowAry.length;j++) {
-        this.$elRow.append('<li>' + this.squaresInfo(this.squareRowAry[j]).join(' ') + '</li>');
+        $elRow.append('<li>' + this.squaresInfo(this.squareRowAry[j]).join(' ') + '</li>');
     }
 };
-
-var pix = new Pix('pix',[
-    [1,0,1,1,1,0,1,1],
-    [1,0,1,1,1,0,1,0],
-    [1,1,1,1,1,0,0,0],
-    [1,0,1,0,1,0,1,0],
-    [1,1,1,1,1,0,0,0],
-    [1,0,1,1,1,0,1,0],
-]);
-pix.squares();
-pix.setEvents();

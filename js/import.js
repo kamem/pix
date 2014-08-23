@@ -7,5 +7,10 @@
 })(
 "html5.js",
 "jquery.js",
-"common.js"
+"deflate.js",
+"inflate.js",
+"pix.js",
+"pixOperation.js",
+"zip.js",
+"main.js"
 );
