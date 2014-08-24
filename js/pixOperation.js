@@ -20,6 +20,8 @@ PixOperation.prototype.setEvents = function() {
         this.pix.widthNum = this.$widthNum.val();
         this.pix.heightNum = this.$heightNum.val();
 
+        this.pix.nowPix = [];
+
         this.pix.color = "rgb(255, 0, 111)";
         this.pix.createSquares();
         this.pix.setEvents();

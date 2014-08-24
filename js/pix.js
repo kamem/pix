@@ -32,7 +32,6 @@ Pix.prototype.createSquares = function() {
     this.canvas.width = this.widthNum * this.squareWidth;
     this.canvas.height = this.heightNum * this.squareHeight;
 
-    console.log(this.nowPix.length);
     var hasNowPix = this.nowPix.length >= this.heightNum;
 
     for(var i = 0;i < this.heightNum;i++) {
