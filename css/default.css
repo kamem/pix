@@ -22,10 +22,6 @@ html {
   font-family: "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", Osaka, "ＭＳ Ｐゴシック", "MS PGothic", Sans-Serif;
 }
 
-body {
-  text-align: center;
-}
-
 /*----------------------------------------
 	HTML5
 ----------------------------------------*/
@@ -46,8 +42,8 @@ address {
 }
 
 h1 {
-  font-size: 18px;
-  font-size: 1.8rem;
+  font-size: 16px;
+  font-size: 1.6rem;
 }
 
 h2 {
