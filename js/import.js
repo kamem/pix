@@ -7,6 +7,7 @@
 })(
 "html5.js",
 "jquery.js",
+"jquery.extratouch.min.js",
 "deflate.js",
 "inflate.js",
 "pix.js",
