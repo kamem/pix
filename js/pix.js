@@ -59,18 +59,55 @@ Pix.prototype.createSquares = function() {
 };
 
 Pix.prototype.setEvents = function() {
-    $(this.canvas).off('click').on('click',function(e){
-        var squarePosition = this.getOffsetSquare(e.offsetX,e.offsetY);
-        this.squareToggle(squarePosition);
+    var hasDrow = false,
+        isMove = false,
+        prevSquare,
+        currentSquare;
+    $(this.canvas).off('mousedown').on('mousedown',function(e) {
+        hasDrow = true;
+    }.bind(this));
 
-        if(this.hasAllCompleted() && !this.isCreateMode) {
-            alert('完成！');
+    $(this.canvas).off('mouseup').on('mouseup',function(e) {
+        hasDrow = false;
+
+        if(!isMove) {
+            var squarePosition = this.getOffsetSquare(e.offsetX,e.offsetY);
+            this.squareToggle(squarePosition);
+
+            if(this.hasAllCompleted() && !this.isCreateMode) {
+                alert('完成！');
+            }
+
+            if(this.isCreateMode) {
+                this.squareRowAry = this.createRowAry(this.nowPix);
+                this.createSquaresInfo(this.nowPix);
+            }
+        }
+        isMove = false;
+    }.bind(this));
+
+    $(this.canvas).off('mousemove').on('mousemove',function(e){
+        if(!hasDrow) {return false}
+        isMove = true;
+
+        prevSquare = JSON.stringify(this.getOffsetSquare(e.offsetX,e.offsetY));
+
+        if(prevSquare !== currentSquare) {
+            var squarePosition = this.getOffsetSquare(e.offsetX,e.offsetY);
+            this.squareToggle(squarePosition);
+
+            if(this.hasAllCompleted() && !this.isCreateMode) {
+                alert('完成！');
+            }
+
+            if(this.isCreateMode) {
+                this.squareRowAry = this.createRowAry(this.nowPix);
+                this.createSquaresInfo(this.nowPix);
+            }
         }
 
-        if(this.isCreateMode) {
-            this.squareRowAry = this.createRowAry(this.nowPix);
-            this.createSquaresInfo(this.nowPix);
-        }
+        currentSquare = JSON.stringify(this.getOffsetSquare(e.offsetX,e.offsetY));
+
     }.bind(this));
 };
 
